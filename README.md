@@ -1,4 +1,5 @@
 # socket
+![](socket.png)
 # config
 1. node: 8.10
 2. npm: 6
@@ -7,4 +8,3 @@
 5. redis: 3.0
 6. jwt: 8.5
 7. eslint
-![](socket.png)
