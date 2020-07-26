@@ -1,8 +1,20 @@
-const redis = require("redis");
+require('dotenv').config()
+const NTypes = require('./model/notifications_type');
+const subscriber = require('./redis/sub');
+const io = require('./socket/io');
 
-const publisher = redis.createClient();
 
-publisher.publish("test", "Hello World", () => {
-  process.exit(0)
-})
+
+subscriber.subscribe(NTypes.one);
+subscriber.subscribe(NTypes.multi);
+subscriber.subscribe(NTypes.all);
+
+
+
+
+
+
+
+
+
 
