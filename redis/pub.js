@@ -4,7 +4,7 @@ const publisher = redis.createClient();
 
 publisher.publish("oneNotification",
   JSON.stringify({
-    "to": "myWiredId1", "data": {
+    "to": "myWiredId", "data": {
       "title": "MTitle",
       "image": "http://blablabla.com/bla.png"
     }

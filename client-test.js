@@ -8,6 +8,7 @@ const socket = require('socket.io-client')(`http://localhost:${process.env.SERVE
     token: signToken('myWiredId')
   }
 });
+
 socket.on("connect", function () {
   console.log('connected');
 });

@@ -3,6 +3,7 @@ const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 const jwt = require('jsonwebtoken');
 const util = require('util');
+const { object } = require('../redis/sub');
 const redisClient = require('redis').createClient();
 
 //validate jwt
@@ -23,24 +24,32 @@ io.use(
     }
   }
 )
+
 io.on('connection', (socket) => {
-  console.log('hi: ' + socket.decodedToken.id);
+  console.log('a user connected to socket: ' + socket.decodedToken.id);
+
+  // cache the socket
+  redisClient.set(socket.decodedToken.id + "/ID", socket.id);
+
+
+  socket.on("disconnect", () => {
+    console.log('user left the socket: ');
+    //remove user from room
+    redisClient.del(socket.decodedToken.id + "/ID");
+  });
 
   //check if user have message ?
-  redisClient.get(socket.decodedToken.id, (err, result) => {
+  redisClient.get(socket.decodedToken.id + "/OFFLINE", (err, result) => {
     if (err) return console.log(err);
     if (result) {
-      console.log('found message: ' + result);
+      console.log('found offline message');
       //send the message to the user
-      socket.emit("message", JSON.parse(result));
-
+      socket.emit("message", result);
       //delete cached message
-      redisClient.del(socket.decodedToken.id);
+      redisClient.del(socket.decodedToken.id + "/OFFLINE");
     }
-
-
-
   });
+
 
 
 });
