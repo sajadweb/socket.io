@@ -1,7 +1,8 @@
 const redis = require('redis');
 const NTypes = require('../model/notifications_type');
 const subscribe = redis.createClient();
-const io = require('../socket/io');
+const io = require('../socket/io').io;
+const adminIo = require('../socket/io').adminIo;
 
 subscribe.on("message", (channel, message) => {
 
@@ -28,7 +29,14 @@ subscribe.on("message", (channel, message) => {
     redisClient.set("s2a", message);
     return;
   }
-})
+  if (channel == NTypes.admin) {
+    for (let to of jsonMessage.to) {
+      adminSubs(to, message);
+    }
+
+    return;
+  }
+});
 
 
 const subs = (to, message) => {
@@ -79,7 +87,19 @@ const s2a = (message) => {
       }
     }
   });
+}
 
+const adminSubs = (to, message) => {
+  const redisClient = redis.createClient();
+  redisClient.get(to + "/ADMIN", (err, sId) => {
+    if (sId) {
+      adminIo.to(sId).emit("message", message);
+    } else {
+      //admin is offline
+      redisClient.set(to + "/ADMIN/OFFLINE", message, 'EX', process.env.MESSAGE_EXPIRES);
+    }
+
+  })
 }
 
 module.exports = subscribe;
