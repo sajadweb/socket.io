@@ -14,7 +14,21 @@ socket.on("connect", function () {
 });
 
 socket.on('message', (data) => {
-  console.log('hoooray! message recived!')
+  console.log('client1 incoming message')
   console.log(data);
 });
 
+const socket1 = require('socket.io-client')(`http://localhost:${process.env.SERVER_PORT}`, {
+  query: {
+    token: signToken('id2')
+  }
+});
+
+socket1.on("connect", function () {
+  console.log('connected');
+});
+
+socket1.on('message', (data) => {
+  console.log('client2 incoming message')
+  console.log(data);
+});

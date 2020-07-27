@@ -50,7 +50,18 @@ io.on('connection', (socket) => {
     }
   });
 
-
+  //check if use have s2a message
+  redisClient.get(socket.decodedToken.id + "/SENT", (err, sended) => {
+    if (sended != "true") {
+      redisClient.get("s2a", (err, message) => {
+        if (message) {
+          io.to(socket.id).emit("message", message);
+          //save the user for prevent duplication in sending
+          redisClient.set(socket.decodedToken.id + "/SENT", true,);
+        }
+      })
+    }
+  });
 
 });
 
