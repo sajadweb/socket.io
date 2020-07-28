@@ -3,8 +3,13 @@ const NTypes = require('../model/notifications_type');
 const subscribe = redis.createClient();
 const io = require('../socket/io').io;
 const adminIo = require('../socket/io').adminIo;
+const async = require('async');
+const { promisify } = require('util');
+const loadash = require('lodash');
 
-subscribe.on("message", (channel, message) => {
+const redisClient = redis.createClient();
+
+subscribe.on("message", async (channel, message) => {
 
   console.log("message: " + message + " on channel:" + channel + " just arrives!");
 
@@ -15,9 +20,28 @@ subscribe.on("message", (channel, message) => {
     return subs(jsonMessage.to, message);
   }
   if (channel == NTypes.multi) {
-    for (let to of jsonMessage.to) {
-      subs(to, message);
-    }
+
+    async.concat(jsonMessage.to, (to, callback) => {
+
+      redisClient.get(to + "/ID", (err, sId) => {
+        if (err) {
+          console.log(err);
+        }
+        if (sId) {
+          io.to(sId).emit("message", message);
+          callback(null, to);
+        } else {
+          console.log('user is offline: ' + "message saved for offline users!");
+          callback("offline")
+        }
+      })
+    }, (err, ids) => {
+
+      const offlineUsers = loadash.difference(jsonMessage.to, ids);
+      //reassign message users & save for offline users
+      jsonMessage.to = offlineUsers;
+      redisClient.set("MULTI" + "/OFFLINE", JSON.stringify(jsonMessage));
+    })
     return;
   }
   if (channel == NTypes.all) {
@@ -25,7 +49,6 @@ subscribe.on("message", (channel, message) => {
     s2a(message);
 
     //save s2s message for offline users
-    const redisClient = redis.createClient();
     redisClient.set("s2a", message);
     return;
   }
@@ -40,7 +63,6 @@ subscribe.on("message", (channel, message) => {
 
 
 const subs = (to, message) => {
-  const redisClient = redis.createClient();
   redisClient.get(to + "/ID", (err, result) => {
     if (err) {
       console.log(err);
@@ -64,8 +86,8 @@ const subs = (to, message) => {
   });
 }
 
+
 const s2a = (message) => {
-  const redisClient = redis.createClient();
   redisClient.keys("*" + "/ID", (err, res) => {
     if (res) {
       // handle s2a
@@ -90,7 +112,6 @@ const s2a = (message) => {
 }
 
 const adminSubs = (to, message) => {
-  const redisClient = redis.createClient();
   redisClient.get(to + "/ADMIN", (err, sId) => {
     if (sId) {
       adminIo.to(sId).emit("message", message);

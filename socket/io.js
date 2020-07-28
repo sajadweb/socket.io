@@ -31,6 +31,25 @@ io.on('connection', (socket) => {
     }
   });
 
+  //check for multi messages
+  redisClient.get("MULTI" + "/OFFLINE", (err, message) => {
+    const parsedMessage = JSON.parse(message);
+    if (parsedMessage.to.includes(socket.decodedToken.id)) {
+      socket.emit("message", message);
+      //delete user from array
+      const index = parsedMessage.to.indexOf(socket.decodedToken.id);
+      parsedMessage.to.splice(index, 1);
+      redisClient.set("MULTI" + "/OFFLINE", JSON.stringify(parsedMessage));
+    }
+
+    //delete message if no receiver left
+    if (parsedMessage.to.length == 0) {
+      console.log('deleting offline message');
+      redisClient.del("MULTI" + "/OFFLINE");
+    }
+  });
+
+
   //check if use have s2a message
   redisClient.get(socket.decodedToken.id + "/SENT", (err, sended) => {
     if (sended != "true") {
