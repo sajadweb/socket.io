@@ -22,7 +22,7 @@ socket.on('message', (data) => {
 
 const socket1 = require('socket.io-client')(`http://localhost:${process.env.SERVER_PORT}`, {
   query: {
-    token: signToken('id2')
+    token: signToken('id3')
   }
 });
 
@@ -31,7 +31,7 @@ socket1.on("connect", function () {
 });
 
 socket1.on('message', (data) => {
-  console.log('client2 incoming message')
+  console.log('client3 incoming message')
   console.log(data);
 });
 
