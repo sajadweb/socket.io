@@ -6,6 +6,8 @@ const adminIo = require('../socket/io').adminIo;
 const async = require('async');
 const { promisify } = require('util');
 const loadash = require('lodash');
+const redisNsp = require('./namespace');
+const { v4: uuidv4 } = require('uuid');
 
 const redisClient = redis.createClient();
 
@@ -23,24 +25,42 @@ subscribe.on("message", async (channel, message) => {
 
     async.concat(jsonMessage.to, (to, callback) => {
 
-      redisClient.get(to + "/ID", (err, sId) => {
+      redisClient.get(to + redisNsp.id, (err, sId) => {
         if (err) {
           console.log(err);
         }
         if (sId) {
-          io.to(sId).emit("message", message);
-          callback(null, to);
+          //check if really user in online?
+          //usefull when server crushes
+          //when server crushes and redis don't
+          //the socketId will exsist in db
+          //after server runs again the saved
+          //socketId will refreshes in db
+          if (io.sockets.connected[sId]) {
+            io.to(sId).emit("message", message);
+            callback(null, to);
+          } else {
+            callback("offline");
+          }
         } else {
           console.log('user is offline: ' + "message saved for offline users!");
           callback("offline")
         }
       })
     }, (err, ids) => {
+      if (err) {
+        const offlineUsers = loadash.difference(jsonMessage.to, ids);
 
-      const offlineUsers = loadash.difference(jsonMessage.to, ids);
-      //reassign message users & save for offline users
-      jsonMessage.to = offlineUsers;
-      redisClient.set("MULTI" + "/OFFLINE", JSON.stringify(jsonMessage));
+        //save the message
+        const messageKey = uuidv4();
+        redisClient.set(messageKey, message, 'EX', process.env.MESSAGE_EXPIRES);
+
+        //save the offline messages
+        async.concat(offlineUsers, (offlineUser) => {
+          redisClient.rpush(offlineUser + redisNsp.multiOffline, messageKey)
+        });
+
+      }
     })
     return;
   }
@@ -63,7 +83,7 @@ subscribe.on("message", async (channel, message) => {
 
 
 const subs = (to, message) => {
-  redisClient.get(to + "/ID", (err, result) => {
+  redisClient.get(to + redisNsp.id, (err, result) => {
     if (err) {
       console.log(err);
     }
@@ -71,15 +91,15 @@ const subs = (to, message) => {
       io.to(result).emit("message", message);
     } else {
       console.log('user is offline(lets save the message!): '
-        + to + "/OFFLINE");
+        + to + redisNsp.offline);
 
       //check if user have other offline messages
-      redisClient.get(to + "/OFFLINE", (err, result) => {
+      redisClient.get(to + redisNsp.offline, (err, result) => {
         if (result) {
           message = message + "#SEPRATOR#" + result
         }
         // caching (user is offline)
-        redisClient.set(to + "/OFFLINE", message, 'EX', process.env.MESSAGE_EXPIRES);
+        redisClient.set(to + redisNsp.offline, message, 'EX', process.env.MESSAGE_EXPIRES);
       });
 
     }
@@ -88,19 +108,19 @@ const subs = (to, message) => {
 
 
 const s2a = (message) => {
-  redisClient.keys("*" + "/ID", (err, res) => {
+  redisClient.keys("*" + redisNsp.id, (err, res) => {
     if (res) {
       // handle s2a
       for (let id of res) {
         redisClient.get(id, (err, sId) => {
           if (sId) {
             //check if this message sended before
-            redisClient.get(id.replace("/ID", "/SENT"), (err, sended) => {
+            redisClient.get(id.replace(redisNsp.id, redisNsp.sent), (err, sended) => {
 
               if (sended != "true") {
                 io.to(sId).emit("message", message);
                 //save the user for prevent duplication in sending
-                redisClient.set(id.replace("/ID", "/SENT"), true,);
+                redisClient.set(id.replace(redisNsp.id, redisNsp.sent), true,);
               }
             });
 
@@ -112,12 +132,12 @@ const s2a = (message) => {
 }
 
 const adminSubs = (to, message) => {
-  redisClient.get(to + "/ADMIN", (err, sId) => {
+  redisClient.get(to + redisNsp.admin, (err, sId) => {
     if (sId) {
       adminIo.to(sId).emit("message", message);
     } else {
       //admin is offline
-      redisClient.set(to + "/ADMIN/OFFLINE", message, 'EX', process.env.MESSAGE_EXPIRES);
+      redisClient.set(to + redisNsp.adminOffline, message, 'EX', process.env.MESSAGE_EXPIRES);
     }
 
   })
