@@ -4,7 +4,7 @@ const subscribe = redis.createClient();
 const io = require('../socket/io').io;
 const adminIo = require('../socket/io').adminIo;
 const async = require('async');
-const { promisify } = require('util');
+
 const loadash = require('lodash');
 const redisNsp = require('./namespace');
 const { v4: uuidv4 } = require('uuid');
@@ -69,7 +69,15 @@ subscribe.on("message", async (channel, message) => {
     s2a(message);
 
     //save s2s message for offline users
-    redisClient.set("s2a", message);
+    //check for another s2a
+    redisClient.get(redisClient.s2a, (err, s2aMessages) => {
+      if (s2aMessages) {
+        const allMesages = loadash.concat(s2aMessages, message);
+        redisClient.set(redisNsp.s2a, s2aMessages);
+      } else {
+        redisClient.set(redisNsp.s2a, message);
+      }
+    })
     return;
   }
   if (channel == NTypes.admin) {
@@ -93,14 +101,15 @@ const subs = (to, message) => {
       console.log('user is offline(lets save the message!): '
         + to + redisNsp.offline);
 
-      //check if user have other offline messages
-      redisClient.get(to + redisNsp.offline, (err, result) => {
-        if (result) {
-          message = message + "#SEPRATOR#" + result
-        }
-        // caching (user is offline)
-        redisClient.set(to + redisNsp.offline, message, 'EX', process.env.MESSAGE_EXPIRES);
-      });
+      //TODO check if user have other offline messages
+      //
+      // redisClient.get(to + redisNsp.offline, (err, result) => {
+      //   if (result) {
+      //     message = message + "#SEPRATOR#" + result
+      //   }
+      // caching (user is offline)
+      redisClient.set(to + redisNsp.offline, message, 'EX', process.env.MESSAGE_EXPIRES);
+      // });
 
     }
   });
@@ -108,10 +117,15 @@ const subs = (to, message) => {
 
 
 const s2a = (message) => {
+
+  //TODO keys must replaced with scan
+
   redisClient.keys("*" + redisNsp.id, (err, res) => {
     if (res) {
       // handle s2a
-      for (let id of res) {
+      //for better performance its better
+      //to do this async
+      async.concat(res, (id, callback) => {
         redisClient.get(id, (err, sId) => {
           if (sId) {
             //check if this message sended before
@@ -121,12 +135,19 @@ const s2a = (message) => {
                 io.to(sId).emit("message", message);
                 //save the user for prevent duplication in sending
                 redisClient.set(id.replace(redisNsp.id, redisNsp.sent), true,);
+                callback(null, 'ok')
+              } else {
+                callback('sended before');
               }
             });
-
+          } else {
+            callback('user is offline');
           }
-        })
-      }
+        });
+      }, (err, result) => {
+        console.log(result);
+        console.log(err);
+      });
     }
   });
 }
