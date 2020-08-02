@@ -118,36 +118,59 @@ const subs = (to, message) => {
 
 const s2a = (message) => {
 
-  //TODO keys must replaced with scan
+  let cursor = 0;
+  async.doWhilst((cb) => {
+
+    redisClient.scan(cursor, "match", "*" + redisNsp.id, (err, foundedIds) => {
+      if (foundedIds) {
+        async.concat(foundedIds[1], (id, callback) => {
+          redisClient.get(id, (err, sId) => {
+            if (sId) {
+              //check if this message sended before
+              redisClient.get(id.replace(redisNsp.id, redisNsp.sent), (err, sended) => {
+                if (sended != "true") {
+                  io.to(sId).emit("message", message);
+                  //save the user for prevent duplication in sending
+                  redisClient.set(id.replace(redisNsp.id, redisNsp.sent), true,);
+                  callback(null, 'ok')
+                } else {
+                  callback('sended before');
+                }
+              });
+            } else {
+              callback('user is offline');
+            }
+          });
+        }, (err, result) => {
+          if (result) console.log(result);
+          if (err) console.log(err);
+        });
+
+        cb(null, foundedIds);
+      } else {
+        cb('error in scan!!');
+      }
+    });
+
+  }, (foundedIds, cb) => {
+    if (foundedIds[0] == "0") {
+      return cb("finish searching", false);
+    }
+    cursor = foundedIds[0];
+    cb(null, true)
+  }, (err) => {
+    console.log(err);
+  })
+
+
+
 
   redisClient.keys("*" + redisNsp.id, (err, res) => {
     if (res) {
       // handle s2a
       //for better performance its better
       //to do this async
-      async.concat(res, (id, callback) => {
-        redisClient.get(id, (err, sId) => {
-          if (sId) {
-            //check if this message sended before
-            redisClient.get(id.replace(redisNsp.id, redisNsp.sent), (err, sended) => {
 
-              if (sended != "true") {
-                io.to(sId).emit("message", message);
-                //save the user for prevent duplication in sending
-                redisClient.set(id.replace(redisNsp.id, redisNsp.sent), true,);
-                callback(null, 'ok')
-              } else {
-                callback('sended before');
-              }
-            });
-          } else {
-            callback('user is offline');
-          }
-        });
-      }, (err, result) => {
-        console.log(result);
-        console.log(err);
-      });
     }
   });
 }

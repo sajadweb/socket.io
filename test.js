@@ -1,5 +1,5 @@
 const _ = require('lodash');
-const { castArray } = require('lodash');
+const { castArray, result } = require('lodash');
 const redisClient = require('redis').createClient();
 const async = require('async');
 //loadash
@@ -15,6 +15,11 @@ const async = require('async');
 
 /*-----------------------------------------------------------------------------------------*/
 
+// for (let i = 0; i < 100000; i++) {
+//   redisClient.del(i);
+// }
+
+
 //redis
 // redisClient.scan(10, "match", "*0*", (err, result) => {
 //   console.log(result);
@@ -24,18 +29,23 @@ const async = require('async');
 //   console.log(res);
 // });
 
-// async.forever((next, res) => {
-//   console.log(res);
-//   let start = 0;
-//   redisClient.scan(start, "match", "1*", (err, result) => {
-//     console.log(result);
-//     if (result[0] == "0") {
-//       next("finish scan");
-//     } else {
-//       start = 60;
-//       next(null,);
-//     }
-//   })
+
+
+// let cursor = 0;
+// async.doWhilst((cb) => {
+//   console.log('do');
+//   redisClient.scan(cursor, "match", "*111*", (err, result) => {
+
+//     cb(null, result);
+//   });
+
+// }, (result, cb) => {
+//   console.log(result);
+//   if (result[0] == "0") {
+//     return cb("finish searching", false);
+//   }
+//   cursor = result[0];
+//   cb(null, true)
 // }, (err) => {
 //   console.log(err);
 // })
@@ -48,4 +58,16 @@ const async = require('async');
 //   res(null, false);
 // }, (cbb) => {
 //   cbb(null, 'r')
+// })
+
+// let start = 0;
+// async.doWhilst((cb) => {
+//   console.log('do');
+//   start++;
+//   cb(null, start);
+// }, (res, cb) => {
+//   console.log(res);
+//   cb(null, true)
+// }, (err) => {
+//   console.log(err);
 // })
