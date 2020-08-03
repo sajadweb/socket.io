@@ -5,7 +5,7 @@ const signToken = require('./util/jwt');
 // // register for message
 const socket = require('socket.io-client')(`http://localhost:${process.env.SERVER_PORT}`, {
   query: {
-    token: signToken('myWiredId')
+    token: signToken('id1')
   }
 });
 
@@ -14,7 +14,7 @@ socket.on("connect", function () {
 });
 
 socket.on('message', (data) => {
-  console.log('client1 incoming message')
+  console.log('id1 incoming message');
   console.log(data);
 });
 
@@ -22,7 +22,7 @@ socket.on('message', (data) => {
 
 const socket1 = require('socket.io-client')(`http://localhost:${process.env.SERVER_PORT}`, {
   query: {
-    token: signToken('id0')
+    token: signToken('id2')
   }
 });
 
@@ -31,7 +31,7 @@ socket1.on("connect", function () {
 });
 
 socket1.on('message', (data) => {
-  console.log('client3 incoming message')
+  console.log('id2 incoming message')
   console.log(data);
 });
 
