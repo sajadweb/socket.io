@@ -7,16 +7,28 @@ const cacheSockets = require('./cache_sockets');
 const oneToOneOffline = require('./one_to_one_offline');
 const oneToMultiOffline = require('./one_to_multi_offline');
 const oneToAllOffline = require('./one_to_all_offline');
+const redisNsp = require('../redis/namespace');
+
+
+
 
 //validate jwt
 io.use(auth.auth);
 
 io.on('connection', (socket) => {
   const socketId = socket.decodedToken.id;
+  const ns = socket.handshake.query.ns;
+
   console.log('a user connected to socket: ' + socketId);
+  console.log(socket.handshake.query.ns);
 
   // cache the socket
-  cacheSockets(socketId, socket);
+  if (ns) {
+    cacheSockets(socketId + redisNsp.namespace + ns, socket);
+  } else {
+    cacheSockets(socketId, socket);
+  }
+
 
   //check if user have message ?
   oneToOneOffline(socketId, socket);

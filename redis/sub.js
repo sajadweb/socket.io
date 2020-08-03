@@ -3,6 +3,7 @@ const subscribe = require('redis').createClient();
 const oneToOne = require('./one_to_one');
 const oneToMulti = require('./one_to_multi');
 const oneToAll = require('./one_to_all');
+const redisNsp = require('./namespace');
 
 
 subscribe.on("message", async (channel, message) => {
@@ -19,6 +20,9 @@ subscribe.on("message", async (channel, message) => {
       break;
     case NTypes.all:
       oneToAll(jsonMessage, message);
+      break;
+    case NTypes.ns:
+      oneToAll(jsonMessage, message, jsonMessage.ns);
       break;
 
   }

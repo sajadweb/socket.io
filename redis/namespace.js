@@ -4,8 +4,8 @@ const redisNsps = {
   offline: "/OFFLINE",
   multiOffline: "/MULTI" + "/OFFLINE",
   sent: "/SENT",
-  admin: "/ADMIN",
-  adminOffline: "/ADMIN/OFFLINE",
+  namespace: "/NAMESPACE",
+  namespaceOffline: "/NAMESPACE/OFFLINE",
   socketNsp: "socketNsp",
   s2a: "s2a",
 

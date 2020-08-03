@@ -7,7 +7,7 @@ const subscriber = require('./redis/sub');
 subscriber.subscribe(NTypes.one);
 subscriber.subscribe(NTypes.multi);
 subscriber.subscribe(NTypes.all);
-subscriber.subscribe(NTypes.admin);
+subscriber.subscribe(NTypes.ns);
 
 
 

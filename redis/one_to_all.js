@@ -21,8 +21,12 @@ const { v4: uuidv4 } = require('uuid');
 
 
 
-const oneToAll = (messageJson, message) => {
-
+const oneToAll = (messageJson, message, ns) => {
+  let namespace = redisNsp.id;
+  if (ns) {
+    namespace = redisNsp.namespace + ns + namespace;
+  }
+  console.log(namespace);
   const messageKey = uuidv4();
 
   let EX;
@@ -36,13 +40,13 @@ const oneToAll = (messageJson, message) => {
   let scanCursor = 0;
   async.doWhilst((cb) => {
 
-    redisClient.scan(scanCursor, "match", "*" + redisNsp.id, (err, onlineSockets) => {
+    redisClient.scan(scanCursor, "match", "*" + namespace, (err, onlineSockets) => {
       if (onlineSockets) {
         async.concat(onlineSockets[1], (socketId, callback) => {
           redisClient.get(socketId, (err, sId) => {
             if (sId) {
               //check if this message sended before
-              const checkKey = messageKey + redisNsp.sent + "/" + socketId.replace(redisNsp.id, '');
+              let checkKey = messageKey + redisNsp.sent + "/" + socketId.replace(namespace, '');
               redisClient.get(checkKey, (err, sended) => {
                 if (!sended) {
                   if (io.sockets.connected[sId]) {
