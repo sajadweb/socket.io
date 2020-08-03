@@ -6,8 +6,12 @@ const { v4: uuidv4 } = require('uuid');
 
 const oneToOne = (socketId, message) => {
 
-  /* user is online send the message
-   */
+  // 1- user is online send message
+  // 2- if user is offline :
+  // first: save the message
+  // second: create a list of messages Key for
+  // that pop when user onlines and i the last
+  // the list will removed.
   redisClient.get(socketId + redisNsp.id, (err, sId) => {
     if (err) {
       //TODO Error handling

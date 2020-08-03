@@ -13,8 +13,7 @@ const oneToMulti = (messageJson, message) => {
   // 2- save the message
   // 3- find offline receivers ( message to list subtract online sended )
   // 4- push messageKey in offline box of user
-  // note : the saved message persist in redis until in some
-  // cronjobs call the scan on redisClient to remove expired keys.
+  // note : the saved message persist in redis until expires.
   async.concat(messageJson.to, (socketId, callback) => {
 
     redisClient.get(socketId + redisNsp.id, (err, sId) => {
