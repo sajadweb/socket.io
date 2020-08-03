@@ -6,6 +6,7 @@ const redisNsps = {
   sent: "/SENT",
   admin: "/ADMIN",
   adminOffline: "/ADMIN/OFFLINE",
+  socketNsp: "socketNsp",
   s2a: "s2a",
 
 

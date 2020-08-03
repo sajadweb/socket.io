@@ -22,7 +22,7 @@ socket.on('message', (data) => {
 
 const socket1 = require('socket.io-client')(`http://localhost:${process.env.SERVER_PORT}`, {
   query: {
-    token: signToken('id3')
+    token: signToken('id0')
   }
 });
 
@@ -36,17 +36,17 @@ socket1.on('message', (data) => {
 });
 
 
-// const socket2 = require('socket.io-client')(`http://localhost:${process.env.SERVER_PORT}`, {
-//   query: {
-//     token: signToken('admin1')
-//   },
-//   path: '/admin'
-// });
+const socket2 = require('socket.io-client')(`http://localhost:${process.env.SERVER_PORT}`, {
+  query: {
+    token: signToken('admin1')
+  },
+  path: '/admin'
+});
 
-// socket2.on("connect", function () {
-//   console.log('connected');
-// });
+socket2.on("connect", function () {
+  console.log('connected');
+});
 
-// socket2.on("message", function (message) {
-//   console.log(message);
-// });
+socket2.on("message", function (message) {
+  console.log(message);
+});

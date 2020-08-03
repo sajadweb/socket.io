@@ -11,9 +11,11 @@ exports.auth = async (socket, next) => {
       socket.decodedToken = decodedToken;
       next();
     } catch (e) {
+      //TODO Error handling
       console.log('Token not valid!');
     }
   } else {
+    // TODO ERROR handling
     console.log('Token is Missing!');
   }
 }

@@ -4,7 +4,6 @@ const subscribe = redis.createClient();
 const io = require('../socket/io').io;
 const adminIo = require('../socket/io').adminIo;
 const async = require('async');
-
 const loadash = require('lodash');
 const redisNsp = require('./namespace');
 const { v4: uuidv4 } = require('uuid');
@@ -65,21 +64,28 @@ subscribe.on("message", async (channel, message) => {
     return;
   }
   if (channel == NTypes.all) {
-    //handle online user s2a
-    s2a(message);
-
     //save s2s message for offline users
+    const messageKey = uuidv4();
+    redisClient.set(messageKey, message, 'EX', process.env.MESSAGE_EXPIRES);
+    //handle online user s2a
+    s2a(message, messageKey, process.env.MESSAGE_EXPIRES);
+
+
+
+    //save in S2aOffline
     //check for another s2a
-    redisClient.get(redisClient.s2a, (err, s2aMessages) => {
-      if (s2aMessages) {
-        const allMesages = loadash.concat(s2aMessages, message);
-        redisClient.set(redisNsp.s2a, s2aMessages);
+    redisClient.get(redisNsp.s2a, (err, allKeys) => {
+      if (allKeys) {
+        redisClient.set(redisNsp.s2a, loadash.toString((loadash.concat(allKeys, messageKey))));
       } else {
-        redisClient.set(redisNsp.s2a, message);
+        redisClient.set(redisNsp.s2a, messageKey);
       }
     })
     return;
   }
+
+
+
   if (channel == NTypes.admin) {
     for (let to of jsonMessage.to) {
       adminSubs(to, message);
@@ -101,22 +107,16 @@ const subs = (to, message) => {
       console.log('user is offline(lets save the message!): '
         + to + redisNsp.offline);
 
-      //TODO check if user have other offline messages
-      //
-      // redisClient.get(to + redisNsp.offline, (err, result) => {
-      //   if (result) {
-      //     message = message + "#SEPRATOR#" + result
-      //   }
-      // caching (user is offline)
-      redisClient.set(to + redisNsp.offline, message, 'EX', process.env.MESSAGE_EXPIRES);
-      // });
+      const messageKey = uuidv4();
+      redisClient.set(messageKey, message, 'EX', process.env.MESSAGE_EXPIRES);
+      redisClient.rpush(to + redisNsp.offline, messageKey);
 
     }
   });
 }
 
 
-const s2a = (message) => {
+const s2a = (message, uuid, ex) => {
 
   let cursor = 0;
   async.doWhilst((cb) => {
@@ -129,10 +129,15 @@ const s2a = (message) => {
               //check if this message sended before
               redisClient.get(id.replace(redisNsp.id, redisNsp.sent), (err, sended) => {
                 if (sended != "true") {
-                  io.to(sId).emit("message", message);
-                  //save the user for prevent duplication in sending
-                  redisClient.set(id.replace(redisNsp.id, redisNsp.sent), true,);
-                  callback(null, 'ok')
+                  if (io.sockets.connected[sId]) {
+                    io.to(sId).emit("message", message);
+                    //save the user for prevent duplication in sending
+                    redisClient.set(uuid + redisNsp.sent + "/" + id.replace(redisNsp.id, ''), true, "EX", ex);
+                    callback(null, 'ok');
+                  } else {
+                    callback('user is offline');
+                  }
+
                 } else {
                   callback('sended before');
                 }
@@ -163,16 +168,6 @@ const s2a = (message) => {
   })
 
 
-
-
-  redisClient.keys("*" + redisNsp.id, (err, res) => {
-    if (res) {
-      // handle s2a
-      //for better performance its better
-      //to do this async
-
-    }
-  });
 }
 
 const adminSubs = (to, message) => {

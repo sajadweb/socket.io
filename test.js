@@ -2,7 +2,7 @@ const _ = require('lodash');
 const { castArray, result } = require('lodash');
 const redisClient = require('redis').createClient();
 const async = require('async');
-//loadash
+// loadash
 // var array = ['{ "hello": "world", "hi": "there" }', '{"hi": "there" }'];
 // var other = _.concat(array, '{ "nice": "team" }');
 
@@ -71,3 +71,5 @@ const async = require('async');
 // }, (err) => {
 //   console.log(err);
 // })
+
+
