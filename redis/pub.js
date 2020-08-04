@@ -40,13 +40,13 @@ publisher.publish(NTypes.one,
 //     process.exit(0)
 //   });
 
-// publisher.publish(NTypes.ns,
-//   JSON.stringify({
-//     "ns": "/admin",
-//     "data": {
-//       "title": "MTitle",
-//       "image": "http://blablabla.com/bla.png"
-//     }
-//   }), () => {
-//     process.exit(0)
-//   });
+publisher.publish(NTypes.ns,
+  JSON.stringify({
+    "ns": "/admin",
+    "data": {
+      "title": "MTitle",
+      "image": "http://blablabla.com/bla.png"
+    }
+  }), () => {
+    process.exit(0)
+  });

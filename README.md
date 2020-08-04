@@ -60,13 +60,108 @@
 
 # How To Use
 
-## one to one
+## Setup
 
-## Change Logs
+1. ```const ssocket = require('sakok-socket')```
 
-## BUGS
+2. ```ssocket.init(app)```
 
-## Authors
+3. publish messages:
+
+```
+const redis = require("redis");
+const NTypes = {
+  "one": "oneNotification", "multi": "multiNotification", "all": "allNotification", "admin": "adminChannel", "ns": "namespace",
+}
+const publisher = redis.createClient();
+```
+
+### one to one publishing
+
+```
+publisher.publish(
+  NTypes.one, //type of channel
+  JSON.stringify({
+    "to": "id1", //socket id of receiver. (jwt payload)
+    "data": {
+      "title": "MTitle",
+      "image": "http://blablabla.com/bla.png",
+      "Time": Date.now(),
+      ...
+    },
+    "EX": 600 // expiration of message in seconds
+  }), () => {
+    process.exit(0)
+      }
+);
+```
+
+### one to multi publishing
+
+```
+publisher.publish(
+  NTypes.multi,
+  JSON.stringify({
+    "to": ["id1", "id2"], // list of receiver sockets 
+    "data": {
+      "title": "MTitle",
+      ...
+    },
+    "EX": 1200 // expiration of message
+  }), () => {
+    process.exit(0);
+  });
+```
+
+### one to all publishing
+
+```
+publisher.publish(
+  NTypes.all,
+  JSON.stringify({
+    "data": {
+      "title": "MTitle",
+      "image": "http://blablabla.com/bla.png",
+      "Time": Date.now(),
+    },
+    "EX": 1200
+  }), () => {
+    process.exit(0)
+  });
+```
+
+### one to  namespaces publishing
+
+```
+publisher.publish(
+  NTypes.ns,
+  JSON.stringify({
+    "ns": "/admin", //namespace 
+    "data": {
+      "title": "MTitle",
+      "image": "http://blablabla.com/bla.png"
+    }
+  }), () => {
+    process.exit(0)
+  });
+```
+
+## socket client connection
+
+```
+const socket = require('socket.io-client')(`http://localhost:${process.env.SERVER_PORT}`, {
+  query: {
+    token: signToken('id1'); //socket id
+    ns: '/admin' //optional:namespace
+  }
+});
+```
+
+# Change Logs
+
+# BUGS
+
+# Authors
 
 1. Mojtaba HosseinPour.
   
