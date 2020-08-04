@@ -1,10 +1,9 @@
 const redisClient = require('redis').createClient();
-const io = require('../socket/io').io;
 const redisNsp = require('./namespace');
 const { v4: uuidv4 } = require('uuid');
 
 
-const oneToOne = (socketId, message) => {
+const oneToOne = (socketId, message, io) => {
 
   // 1- user is online send message
   // 2- if user is offline :

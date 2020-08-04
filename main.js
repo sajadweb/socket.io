@@ -1,17 +1,18 @@
-require('dotenv').config()
-const NTypes = require('./model/notifications_type');
-const subscriber = require('./redis/sub');
+const dotenv = require('dotenv');
+const sub = require('./redis/sub');
+const socketio = require('socket.io');
+const { auth } = require('./controller/auth');
+const { onConnection } = require('./socket/io');
 
 
 
-subscriber.subscribe(NTypes.one);
-subscriber.subscribe(NTypes.multi);
-subscriber.subscribe(NTypes.all);
-subscriber.subscribe(NTypes.ns);
-
-
-
-
+exports.init = (server) => {
+  dotenv.config();
+  const io = socketio(server);
+  io.use(auth);
+  io.on('connection', onConnection);
+  sub.subscriber(io);
+}
 
 
 

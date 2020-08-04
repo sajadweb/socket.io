@@ -1,12 +1,11 @@
 const redisClient = require('redis').createClient();
-const io = require('../socket/io').io;
 const async = require('async');
 const loadash = require('lodash');
 const redisNsp = require('./namespace');
 const { v4: uuidv4 } = require('uuid');
 
 
-const oneToMulti = (messageJson, message) => {
+const oneToMulti = (messageJson, message, io) => {
 
 
   // 1- send message to all online users

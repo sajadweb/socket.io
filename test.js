@@ -73,3 +73,13 @@ const async = require('async');
 // })
 
 
+/**------------------------ */
+// const mainn = require('./main').startServer;
+// console.log(mainn(require('express')()));
+const mainjs = require('./main');
+const app = require('express')();
+const server = require('http').createServer(app);
+mainjs.init(server);
+server.listen(7999, () => {
+  console.log('started')
+})

@@ -1,6 +1,5 @@
 const lodash = require("lodash");
 const redisClient = require('redis').createClient();
-const io = require('../socket/io').io;
 const async = require('async');
 const redisNsp = require('./namespace');
 const { v4: uuidv4 } = require('uuid');
@@ -21,7 +20,7 @@ const { v4: uuidv4 } = require('uuid');
 
 
 
-const oneToAll = (messageJson, message, ns) => {
+const oneToAll = (messageJson, message, ns, io) => {
   let namespace = redisNsp.id;
   if (ns) {
     namespace = redisNsp.namespace + ns + namespace;
