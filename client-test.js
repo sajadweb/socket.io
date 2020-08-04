@@ -3,20 +3,22 @@ dotenv.config();
 const signToken = require('./util/jwt');
 
 // // register for message
-// const socket = require('socket.io-client')(`http://localhost:${process.env.SERVER_PORT}`, {
-//   query: {
-//     token: signToken('id1')
-//   }
-// });
+const socket = require('socket.io-client')(`http://localhost:${process.env.SERVER_PORT}`, {
+  query: {
+    token: signToken('id1')
+  }
+});
+
+socket.emit("get", "all:online");
 
 // socket.on("connect", function () {
 //   console.log('connected');
 // });
 
-// socket.on('message', (data) => {
-//   console.log('id1 incoming message');
-//   console.log(data);
-// });
+socket.on('message', (data) => {
+  console.log('id1 incoming message');
+  console.log(data);
+});
 
 
 
@@ -40,7 +42,7 @@ socket1.on('message', (data) => {
 const socket2 = require('socket.io-client')(`http://localhost:${process.env.SERVER_PORT}`, {
   query: {
     token: signToken('admin1'),
-    ns: "/admin"
+
   },
 });
 

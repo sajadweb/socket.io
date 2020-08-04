@@ -18,7 +18,7 @@ const oneToMultiOffline = (socketId, socket) => {
       }
     });
   }, (err) => {
-    console.log(err);
+    // console.log(err);
   });
 }
 

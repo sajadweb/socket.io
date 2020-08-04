@@ -34,7 +34,6 @@ const oneToMulti = (messageJson, message) => {
           callback("offline");
         }
       } else {
-        console.log('user is offline: ' + "message saved for offline users!");
         callback("offline")
       }
     })
@@ -51,7 +50,6 @@ const oneToMulti = (messageJson, message) => {
         EX = process.env.MESSAGE_EXPIRES;
       }
       redisClient.set(messageKey, message, 'EX', EX);
-
 
       const offlineReceivers = loadash.difference(messageJson.to, ids);
       async.concat(offlineReceivers, (offline) => {

@@ -26,7 +26,6 @@ const oneToAll = (messageJson, message, ns) => {
   if (ns) {
     namespace = redisNsp.namespace + ns + namespace;
   }
-  console.log(namespace);
   const messageKey = uuidv4();
 
   let EX;
@@ -66,8 +65,8 @@ const oneToAll = (messageJson, message, ns) => {
             }
           });
         }, (err, result) => {
-          if (result) console.log(result);
-          if (err) console.log(err);
+          // if (result) console.log(result);
+          // if (err) console.log(err);
         });
 
         cb(null, onlineSockets);
@@ -83,7 +82,7 @@ const oneToAll = (messageJson, message, ns) => {
     scanCursor = onlineSockets[0];
     cb(null, true)
   }, (err) => {
-    console.log(err);
+    // console.log(err);
   })
 
 

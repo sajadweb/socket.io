@@ -58,6 +58,10 @@
  4. save the s2a message to global s2a list.\
  note : expiration added to first stage not the list.
 
+# How To Use
+
+## one to one
+
 ## Change Logs
 
 ## BUGS

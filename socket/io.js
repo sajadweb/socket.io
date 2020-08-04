@@ -8,7 +8,7 @@ const oneToOneOffline = require('./one_to_one_offline');
 const oneToMultiOffline = require('./one_to_multi_offline');
 const oneToAllOffline = require('./one_to_all_offline');
 const redisNsp = require('../redis/namespace');
-
+const onlineUsers = require('../redis/online_users');
 
 
 
@@ -19,8 +19,18 @@ io.on('connection', (socket) => {
   const socketId = socket.decodedToken.id;
   const ns = socket.handshake.query.ns;
 
-  console.log('a user connected to socket: ' + socketId);
-  console.log(socket.handshake.query.ns);
+  // console.log('a user connected to socket: ' + socketId);
+  // console.log(socket.handshake.query.ns);
+
+  // list of online users
+  socket.on("get", (body) => {
+    switch (body) {
+      case "all:online":
+        onlineUsers(socket);
+        break;
+    }
+  });
+
 
   // cache the socket
   if (ns) {
@@ -42,32 +52,6 @@ io.on('connection', (socket) => {
   oneToAllOffline(socketId, socket);
 
 });
-
-
-// adminIo.use(auth.auth);
-
-// adminIo.on("connection", (socket) => {
-//   const socketId = socket.decodedToken.id;
-//   // cache the socket
-//   redisClient.set(socketId + redisNsp.admin, socket.id);
-//   socket.on("disconnect", () => {
-//     console.log('admin left the socket: ');
-//     //remove user from room
-//     redisClient.del(socketId + redisNsp.admin);
-//   });
-
-//   //check if admin has message
-//   redisClient.get(socketId + redisNsp.adminOffline, (err, result) => {
-//     if (err) return console.log(err);
-//     if (result) {
-//       console.log('found offline message: for admin');
-//       //send the message to the user
-//       socket.emit("message", result);
-//       //delete cached message
-//       redisClient.del(socketId + redisNsp.adminOffline);
-//     }
-//   });
-// });
 
 
 server.listen(process.env.SERVER_PORT, () => {

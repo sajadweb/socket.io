@@ -9,7 +9,6 @@ const oneToOneOffline = (socketId, socket) => {
       if (messageKey) {
         redisClient.get(messageKey, (err, message) => {
           if (message) {
-            console.log('found offline message');
             socket.emit("message", message);
             redisClient.del(messageKey);
           }

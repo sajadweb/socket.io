@@ -33,8 +33,8 @@ const oneToAllOffline = (socketId, socket) => {
           }
         });
       }, (err, result) => {
-        if (err) console.log(err);
-        if (result) console.log(result);
+        // if (err) console.log(err);
+        // if (result) console.log(result);
       });
     }
   });
