@@ -84,7 +84,7 @@ const server = mainjs.init(app);
 server.listen(3000, () => {
   console.log('started')
 })
-mainjs.pub.sendOneToOne({
+mainjs.sendOneToOne({
   "to": "id1",
   "data": {
     "title": "MTitle",
@@ -94,8 +94,10 @@ mainjs.pub.sendOneToOne({
   "EX": 600
 });
 
+mainjs.sendOneToOne()
+
 async function t() {
-  console.log(await mainjs.redis.onlineUsers());
+  console.log(await mainjs.getOnlineUsers());
 }
 
 t();

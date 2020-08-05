@@ -1,7 +1,9 @@
 const NTypes = require('../model/notifications_type');
 const redisClient = require('redis').createClient();
 
+
 exports.sendOneToOne = (data) => {
+
   redisClient.publish(
     NTypes.one,
     JSON.stringify(data),
@@ -9,6 +11,7 @@ exports.sendOneToOne = (data) => {
       console.log("one to one",);
     });
 }
+
 
 exports.sendOneToMulti = (data) => {
   redisClient.publish(

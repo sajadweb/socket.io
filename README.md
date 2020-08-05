@@ -62,88 +62,71 @@
 
 ## Setup
 
-1. ```const ssocket = require('sakok-socket')```
+1. ```const sakokSocket = require('sakok-socket')```
 
-2. ```ssocket.init(app)```
+2. ```sakokSocket.init(app)```
 
 3. publish messages:
-
-```
-const redis = require("redis");
-const NTypes = {
-  "one": "oneNotification", "multi": "multiNotification", "all": "allNotification", "ns": "namespace",
-}
-const publisher = redis.createClient();
-```
 
 ### one to one publishing
 
 ```
-publisher.publish(
-  NTypes.one, //type of channel
-  JSON.stringify({
-    "to": "id1", //socket id of receiver. (jwt payload)
-    "data": {
-      "title": "MTitle",
-      "image": "http://blablabla.com/bla.png",
-      "Time": Date.now(),
-      ...
-    },
-    "EX": 600 // expiration of message in seconds
-  }), () => {
-    process.exit(0)
-      }
-);
+sakokSocket.sendOneToOne({
+  "to": "id1", //socket id of receiver
+  "data": {
+    "title": "MTitle",
+    "image": "http://blablabla.com/bla.png",
+    "Time": Date.now(),
+  },
+  "EX": 600 //expiration  in seconds
+});
 ```
 
 ### one to multi publishing
 
 ```
-publisher.publish(
-  NTypes.multi,
-  JSON.stringify({
-    "to": ["id1", "id2"], // list of receiver sockets 
-    "data": {
-      "title": "MTitle",
-      ...
-    },
-    "EX": 1200 // expiration of message
-  }), () => {
-    process.exit(0);
-  });
+sakokSocket.sendOneToMulti({
+  "to": ["id1", "id2], //list of socket ids of receiver
+  "data": {
+    "title": "MTitle",
+    "image": "http://blablabla.com/bla.png",
+    "Time": Date.now(),
+  },
+  "EX": 600 //expiration  in seconds
+});
 ```
 
 ### one to all publishing
 
 ```
-publisher.publish(
-  NTypes.all,
-  JSON.stringify({
-    "data": {
-      "title": "MTitle",
-      "image": "http://blablabla.com/bla.png",
-      "Time": Date.now(),
-    },
-    "EX": 1200
-  }), () => {
-    process.exit(0)
-  });
+sakokSocket.sendOneToAll({
+  "data": {
+    "title": "MTitle",
+    "image": "http://blablabla.com/bla.png",
+    "Time": Date.now(),
+  },
+  "EX": 600 //expiration  in seconds
+});
 ```
 
 ### one to  namespaces publishing
 
 ```
-publisher.publish(
-  NTypes.ns,
-  JSON.stringify({
-    "ns": "/admin", //namespace 
-    "data": {
-      "title": "MTitle",
-      "image": "http://blablabla.com/bla.png"
-    }
-  }), () => {
-    process.exit(0)
-  });
+sakokSocket.sendOneToOne({
+  "ns": "/admin", //namespace
+  "data": {
+    "title": "MTitle",
+    "image": "http://blablabla.com/bla.png",
+    "Time": Date.now(),
+  },
+  "EX": 600 //expiration  in seconds
+});
+```
+
+### get socket ids of onlines
+
+```
+sakokSocket.getOnlineUsers()
 ```
 
 ## socket client connection

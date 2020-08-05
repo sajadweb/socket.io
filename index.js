@@ -7,7 +7,7 @@ const pub = require('./controller/pubController');
 const redisController = require('./controller/redisController');
 
 
-exports.init = (app) => {
+const init = (app) => {
   const server = http.createServer(app);
   const io = socketio(server);
   io.use(auth);
@@ -16,5 +16,11 @@ exports.init = (app) => {
   return server;
 }
 
-exports.pub = pub;
-exports.redis = redisController;
+module.exports = {
+  init,
+  sendOneToOne: pub.sendOneToOne,
+  sendOneToMulti: pub.sendOneToMulti,
+  sendOneToAll: pub.oneToAll,
+  getOnlineUsers: redisController.onlineUsers,
+};
+
