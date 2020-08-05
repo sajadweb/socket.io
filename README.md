@@ -71,7 +71,7 @@
 ```
 const redis = require("redis");
 const NTypes = {
-  "one": "oneNotification", "multi": "multiNotification", "all": "allNotification", "admin": "adminChannel", "ns": "namespace",
+  "one": "oneNotification", "multi": "multiNotification", "all": "allNotification", "ns": "namespace",
 }
 const publisher = redis.createClient();
 ```

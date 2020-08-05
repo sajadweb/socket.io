@@ -1,6 +1,6 @@
 
 const NTypes = {
-  "one": "oneNotification", "multi": "multiNotification", "all": "allNotification", "admin": "adminChannel", "ns": "namespace",
+  "one": "oneNotification", "multi": "multiNotification", "all": "allNotification", "ns": "namespace",
 }
 
 

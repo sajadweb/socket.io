@@ -9,7 +9,7 @@ const socket = require('socket.io-client')(`http://localhost:${process.env.SERVE
   }
 });
 
-socket.emit("get", "all:online");
+// socket.emit("get", "all:online");
 
 // socket.on("connect", function () {
 //   console.log('connected');
@@ -22,10 +22,10 @@ socket.on('message', (data) => {
 
 
 
-const socket1 = require('socket.io-client')(`http://localhost:${process.env.SERVER_PORT}`, {
+const socket1 = require('socket.io-client')(`http://localhost:3000`, {
   query: {
-    token: signToken('id2'),
-    ns: "/admin"
+    token: signToken('id5'),
+
   }
 });
 

@@ -76,10 +76,26 @@ const async = require('async');
 /**------------------------ */
 // const mainn = require('./main').startServer;
 // console.log(mainn(require('express')()));
-const mainjs = require('./main');
+const mainjs = require('./index');
+const dotenv = require('dotenv');
+dotenv.config();
 const app = require('express')();
-const server = require('http').createServer(app);
-mainjs.init(server);
-server.listen(7999, () => {
+const server = mainjs.init(app);
+server.listen(3000, () => {
   console.log('started')
 })
+mainjs.pub.sendOneToOne({
+  "to": "id1",
+  "data": {
+    "title": "MTitle",
+    "image": "http://blablabla.com/bla.png",
+    "Time": Date.now(),
+  },
+  "EX": 600
+});
+
+async function t() {
+  console.log(await mainjs.redis.onlineUsers());
+}
+
+t();
