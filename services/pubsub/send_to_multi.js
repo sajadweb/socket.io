@@ -1,11 +1,11 @@
 const redisClient = require('redis').createClient();
 const async = require('async');
-const loadash = require('lodash');
-const redisNsp = require('./namespace');
+const _ = require('lodash');
+const redisNsp = require('../../constants/caching_names.enum');
 const { v4: uuidv4 } = require('uuid');
+const socketEnum = require('../../constants/socket.enum');
 
-
-const oneToMulti = (messageJson, message, io) => {
+const sendToMulti = (messageJson, message, io) => {
 
 
   // 1- send message to all online users
@@ -15,7 +15,7 @@ const oneToMulti = (messageJson, message, io) => {
   // note : the saved message persist in redis until expires.
   async.concat(messageJson.to, (socketId, callback) => {
 
-    redisClient.get(socketId + redisNsp.id, (err, sId) => {
+    redisClient.get(socketId + redisNsp.ID, (err, sId) => {
       if (err) {
         console.log(err);
       }
@@ -26,8 +26,8 @@ const oneToMulti = (messageJson, message, io) => {
         //the socketId will exsist in db
         //after server runs again the saved
         //socketId will refreshes in db
-        if (io.sockets.connected[sId]) {
-          io.to(sId).emit("message", message);
+        if (_.get(io.sockets, `connected.${sId}`, null)) {
+          io.to(sId).emit(socketEnum.MESSAGE, message);
           callback(null, socketId);
         } else {
           callback("offline");
@@ -50,12 +50,12 @@ const oneToMulti = (messageJson, message, io) => {
       }
       redisClient.set(messageKey, message, 'EX', EX);
 
-      const offlineReceivers = loadash.difference(messageJson.to, ids);
+      const offlineReceivers = _.difference(messageJson.to, ids);
       async.concat(offlineReceivers, (offline) => {
-        redisClient.rpush(offline + redisNsp.multiOffline, messageKey);
+        redisClient.rpush(offline + redisNsp.MULTI_OFFLINE, messageKey);
       });
 
     }
   })
 }
-module.exports = oneToMulti;
+module.exports = sendToMulti;

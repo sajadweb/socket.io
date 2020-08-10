@@ -1,7 +1,8 @@
-const sub = require('./redis/sub');
+require('./config/extensions');
+const sub = require('./services/pubsub/sub');
 const socketio = require('socket.io');
 const { auth } = require('./controller/auth');
-const { onConnection } = require('./socket/io');
+const { onConnection } = require('./services/socket/io');
 const http = require('http');
 const pub = require('./controller/pubController');
 const redisController = require('./controller/redisController');

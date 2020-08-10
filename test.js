@@ -1,5 +1,4 @@
 const _ = require('lodash');
-const { castArray, result } = require('lodash');
 const redisClient = require('redis').createClient();
 const async = require('async');
 // loadash
@@ -84,20 +83,23 @@ const server = mainjs.init(app);
 server.listen(3000, () => {
   console.log('started')
 })
-mainjs.sendOneToOne({
-  "to": "id1",
-  "data": {
-    "title": "MTitle",
-    "image": "http://blablabla.com/bla.png",
-    "Time": Date.now(),
-  },
-  "EX": 600
-});
+// mainjs.sendOneToMulti({
+//   "to": ["id1", "id2"],
+//   "data": {
+//     "title": "MTitle",
+//     "image": "http://blablabla.com/bla.png",
+//     "Time": Date.now(),
+//   },
+//   "EX": 600
+// });
 
-mainjs.sendOneToOne()
+// mainjs.sendOneToOne()
 
-async function t() {
-  console.log(await mainjs.getOnlineUsers());
-}
+// async function t() {
+//   console.log(await mainjs.getOnlineUsers());
+// }
 
-t();
+// t();
+
+// console.log('oh runned');
+// module.exports = {};

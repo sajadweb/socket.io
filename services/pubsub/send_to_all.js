@@ -1,9 +1,9 @@
-const lodash = require("lodash");
+const _ = require('lodash');
 const redisClient = require('redis').createClient();
 const async = require('async');
-const redisNsp = require('./namespace');
+const redisNsp = require('../../constants/caching_names.enum');
 const { v4: uuidv4 } = require('uuid');
-
+const socketEnum = require('../../constants/socket.enum');
 
 // 1- save the message
 // 2- scan the all online users
@@ -20,12 +20,11 @@ const { v4: uuidv4 } = require('uuid');
 
 
 
-const oneToAll = (messageJson, message, ns, io) => {
-  let namespace = redisNsp.id;
-  if (ns) {
-    namespace = redisNsp.namespace + ns + namespace;
-  }
+const sendToAll = (messageJson, message, io) => {
+  let namespace = redisNsp.ID;
+
   const messageKey = uuidv4();
+
 
   let EX;
   if (messageJson.EX) {
@@ -35,20 +34,24 @@ const oneToAll = (messageJson, message, ns, io) => {
   }
   redisClient.set(messageKey, message, 'EX', EX);
 
+
+
   let scanCursor = 0;
   async.doWhilst((cb) => {
 
-    redisClient.scan(scanCursor, "match", "*" + namespace, (err, onlineSockets) => {
+
+    redisClient.scan(scanCursor, "match", namespace.toOnlineId(), (err, onlineSockets) => {
       if (onlineSockets) {
         async.concat(onlineSockets[1], (socketId, callback) => {
           redisClient.get(socketId, (err, sId) => {
             if (sId) {
               //check if this message sended before
-              let checkKey = messageKey + redisNsp.sent + "/" + socketId.replace(namespace, '');
+              let checkKey = messageKey + redisNsp.SENT + "/" + socketId.replace(namespace, '');
               redisClient.get(checkKey, (err, sended) => {
                 if (!sended) {
-                  if (io.sockets.connected[sId]) {
-                    io.to(sId).emit("message", message);
+
+                  if (_.get(io.sockets, `connected.${sId}`, null)) {
+                    io.to(sId).emit(socketEnum.MESSAGE, message);
                     //save the user for prevent duplication in sending
                     redisClient.set(checkKey, true, "EX", EX);
                     callback(null, 'ok');
@@ -84,17 +87,16 @@ const oneToAll = (messageJson, message, ns, io) => {
     // console.log(err);
   })
 
-
   //save in s2a
   //check for another s2a
-  redisClient.get(redisNsp.s2a, (err, allKeys) => {
+  redisClient.get(redisNsp.S2A, (err, allKeys) => {
     if (allKeys) {
-      redisClient.set(redisNsp.s2a, lodash.toString((lodash.concat(allKeys, messageKey))));
+      redisClient.set(redisNsp.S2A, _.toString((_.concat(allKeys, messageKey))));
     } else {
-      redisClient.set(redisNsp.s2a, messageKey);
+      redisClient.set(redisNsp.S2A, messageKey);
     }
   });
 
 }
 
-module.exports = oneToAll;
+module.exports = sendToAll;

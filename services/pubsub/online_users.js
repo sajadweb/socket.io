@@ -1,5 +1,5 @@
 const redisClient = require('redis').createClient();
-const redisNsp = require('./namespace');
+const redisNsp = require('../../constants/caching_names.enum');
 const async = require('async');
 
 const onlineUsers = (socket) => {
@@ -7,10 +7,11 @@ const onlineUsers = (socket) => {
   let cursor = 0;
   let onlineUsers = [];
   async.doWhilst((cb) => {
-    redisClient.scan(cursor, "match", "*" + redisNsp.id, (err, onlineSockets) => {
+    redisClient.scan(cursor, "match", redisNsp.ID.toOnlineId(), (err, onlineSockets) => {
       if (onlineSockets) {
         for (onlineSocket of onlineSockets[1]) {
-          onlineUsers.push(onlineSocket.replace(redisNsp.id, '').split(redisNsp.namespace)[0]);
+
+          onlineUsers.push(onlineSocket.split("/")[0]);
         }
         cb(null, onlineSockets);
       } else {
@@ -20,7 +21,6 @@ const onlineUsers = (socket) => {
   },
     (onlineSockets, cb) => {
       if (onlineSockets[0] == "0") {
-        console.log(onlineUsers);
         socket.emit("message", onlineUsers.toString());
         return cb('scan online users finished', false);
       } else {

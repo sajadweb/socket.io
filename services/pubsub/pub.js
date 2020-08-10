@@ -1,5 +1,5 @@
 const redis = require("redis");
-const NTypes = require('../model/notifications_type');
+const NTypes = require('../../constants/notification_types.enum');
 const publisher = redis.createClient();
 
 
@@ -22,23 +22,23 @@ const publisher = redis.createClient();
 //     "data": {
 //       "title": "MTitle"
 //     },
-//     "EX": 12
+//     "EX": 120
 //   }), () => {
 //     process.exit(0);
 //   });
 
 
-publisher.publish(NTypes.all,
-  JSON.stringify({
-    "data": {
-      "title": "MTitle",
-      "image": "http://blablabla.com/bla.png",
-      "Time": Date.now(),
-    },
-    "EX": 16
-  }), () => {
-    process.exit(0)
-  });
+// publisher.publish(NTypes.all,
+//   JSON.stringify({
+//     "data": {
+//       "title": "MTitle",
+//       "image": "http://blablabla.com/bla.png",
+//       "Time": Date.now(),
+//     },
+//     "EX": 160
+//   }), () => {
+//     process.exit(0)
+//   });
 
 // publisher.publish(NTypes.ns,
 //   JSON.stringify({
@@ -46,7 +46,8 @@ publisher.publish(NTypes.all,
 //     "data": {
 //       "title": "MTitle",
 //       "image": "http://blablabla.com/bla.png"
-//     }
+//     },
+//     "EX": 160
 //   }), () => {
 //     process.exit(0)
 //   });

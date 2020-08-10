@@ -9,11 +9,11 @@ const socket = require('socket.io-client')(`http://localhost:${process.env.SERVE
   }
 });
 
-// socket.emit("get", "all:online");
+socket.emit("get", "all:online");
 
-// socket.on("connect", function () {
-//   console.log('connected');
-// });
+socket.on("connect", function () {
+  console.log('connected');
+});
 
 socket.on('message', (data) => {
   console.log('id1 incoming message');
@@ -24,7 +24,7 @@ socket.on('message', (data) => {
 
 const socket1 = require('socket.io-client')(`http://localhost:3000`, {
   query: {
-    token: signToken('id5'),
+    token: signToken('id3'),
 
   }
 });
@@ -41,8 +41,8 @@ socket1.on('message', (data) => {
 
 const socket2 = require('socket.io-client')(`http://localhost:${process.env.SERVER_PORT}`, {
   query: {
-    token: signToken('admin1'),
-
+    token: signToken('admin6'),
+    ns: "/admin"
   },
 });
 
