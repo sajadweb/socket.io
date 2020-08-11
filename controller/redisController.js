@@ -10,7 +10,7 @@ exports.onlineUsers = async () => {
   let onlineUsers = [];
 
   await async.doWhilst((cb) => {
-    redisClient.scan(cursor, "match", "*" + redisNsp.ID, (err, onlineSockets) => {
+    redisClient.scan(cursor, redisNsp.MATCH, redisNsp.ID.toOnlineId(), (err, onlineSockets) => {
       if (onlineSockets) {
         for (onlineSocket of onlineSockets[1]) {
           onlineUsers.push(onlineSocket.replace(redisNsp.ID, '').split(redisNsp.namespace)[0]);

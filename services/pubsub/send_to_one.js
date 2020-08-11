@@ -18,7 +18,7 @@ const sendToOne = (socketId, message, io) => {
       console.log(err);
     }
 
-    if (sId && _.get(io.sockets, `connected.${sId}`, null)) {
+    if (sId && _.get(io.sockets, sId.toConnected(), null)) {
 
       io.to(sId).emit(socketEnum.MESSAGE, message);
 
@@ -33,7 +33,7 @@ const sendToOne = (socketId, message, io) => {
       } else {
         EX = process.env.MESSAGE_EXPIRES;
       }
-      redisClient.set(messageKey, message, 'EX', EX);
+      redisClient.set(messageKey, message, redisNsp.EX, EX);
       redisClient.rpush(socketId + redisNsp.OFFLINE, messageKey);
     }
   });

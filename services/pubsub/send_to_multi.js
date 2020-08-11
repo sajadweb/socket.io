@@ -4,7 +4,7 @@ const _ = require('lodash');
 const redisNsp = require('../../constants/caching_names.enum');
 const { v4: uuidv4 } = require('uuid');
 const socketEnum = require('../../constants/socket.enum');
-
+const statusEnum = require('../../constants/status.enum');
 const sendToMulti = (messageJson, message, io) => {
 
 
@@ -26,14 +26,14 @@ const sendToMulti = (messageJson, message, io) => {
         //the socketId will exsist in db
         //after server runs again the saved
         //socketId will refreshes in db
-        if (_.get(io.sockets, `connected.${sId}`, null)) {
+        if (_.get(io.sockets, sId.toConnected(), null)) {
           io.to(sId).emit(socketEnum.MESSAGE, message);
           callback(null, socketId);
         } else {
-          callback("offline");
+          callback(statusEnum.OFFLINE);
         }
       } else {
-        callback("offline")
+        callback(statusEnum.OFFLINE)
       }
     })
   }, (err, ids) => {
@@ -48,7 +48,7 @@ const sendToMulti = (messageJson, message, io) => {
       } else {
         EX = process.env.MESSAGE_EXPIRES;
       }
-      redisClient.set(messageKey, message, 'EX', EX);
+      redisClient.set(messageKey, message, redisNsp.EX, EX);
 
       const offlineReceivers = _.difference(messageJson.to, ids);
       async.concat(offlineReceivers, (offline) => {

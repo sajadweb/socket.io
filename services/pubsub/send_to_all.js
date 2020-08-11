@@ -4,7 +4,7 @@ const async = require('async');
 const redisNsp = require('../../constants/caching_names.enum');
 const { v4: uuidv4 } = require('uuid');
 const socketEnum = require('../../constants/socket.enum');
-
+const statusEnum = require('../../constants/status.enum');
 // 1- save the message
 // 2- scan the all online users
 // note: scan return an array that
@@ -32,7 +32,7 @@ const sendToAll = (messageJson, message, io) => {
   } else {
     EX = process.env.MESSAGE_EXPIRES;
   }
-  redisClient.set(messageKey, message, 'EX', EX);
+  redisClient.set(messageKey, message, redisNsp.EX, EX);
 
 
 
@@ -40,7 +40,7 @@ const sendToAll = (messageJson, message, io) => {
   async.doWhilst((cb) => {
 
 
-    redisClient.scan(scanCursor, "match", namespace.toOnlineId(), (err, onlineSockets) => {
+    redisClient.scan(scanCursor, redisNsp.MATCH, namespace.toOnlineId(), (err, onlineSockets) => {
       if (onlineSockets) {
         async.concat(onlineSockets[1], (socketId, callback) => {
           redisClient.get(socketId, (err, sId) => {
@@ -50,20 +50,20 @@ const sendToAll = (messageJson, message, io) => {
               redisClient.get(checkKey, (err, sended) => {
                 if (!sended) {
 
-                  if (_.get(io.sockets, `connected.${sId}`, null)) {
+                  if (_.get(io.sockets, sId.toConnected(), null)) {
                     io.to(sId).emit(socketEnum.MESSAGE, message);
                     //save the user for prevent duplication in sending
-                    redisClient.set(checkKey, true, "EX", EX);
+                    redisClient.set(checkKey, true, redisNsp.EX, EX);
                     callback(null, 'ok');
                   } else {
-                    callback('user is offline');
+                    callback(statusEnum.OFFLINE);
                   }
                 } else {
                   callback('sended before');
                 }
               });
             } else {
-              callback('user is offline');
+              callback(statusEnum.OFFLINE);
             }
           });
         }, (err, result) => {

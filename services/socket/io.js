@@ -15,7 +15,7 @@ exports.onConnection = (socket) => {
   console.log(socket.handshake.query.ns);
 
   // list of online users
-  socket.on("get", (body) => {
+  socket.on(socketEnum.GET, (body) => {
     if (body === socketEnum.ALL_ONLINE) {
       return onlineUsers(socket);
     }

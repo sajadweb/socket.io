@@ -21,7 +21,7 @@ const sendToAllOffline = (socketId, socket) => {
                   if (!sent) {
 
                     socket.emit(socketEnum.MESSAGE, messageStr);
-                    redisClient.set(messageKey + redisNsp.SENT + "/" + socketId, true, "EX", ttl);
+                    redisClient.set(messageKey + redisNsp.SENT + "/" + socketId, true, redisNsp.EX, ttl);
                   }
                   cb(null, socketId);
                 });

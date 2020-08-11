@@ -6,13 +6,13 @@ const { onConnection } = require('./services/socket/io');
 const http = require('http');
 const pub = require('./controller/pubController');
 const redisController = require('./controller/redisController');
-
+const socketEnum = require('./constants/socket.enum');
 
 const init = (app) => {
   const server = http.createServer(app);
   const io = socketio(server);
   io.use(auth);
-  io.on('connection', onConnection);
+  io.on(socketEnum.CONNECTION, onConnection);
   sub.subscriber(io);
   return server;
 }

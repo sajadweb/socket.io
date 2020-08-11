@@ -7,6 +7,8 @@ const redisNsps = {
   NAMESPACE_OFFLINE: "/NAMESPACE/OFFLINE",
   SOCKET: "socketNsp",
   S2A: "s2a",
+  EX: 'EX',
+  MATCH: 'match',
 }
 
 Object.freeze(redisNsps);
