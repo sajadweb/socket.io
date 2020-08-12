@@ -1,15 +1,17 @@
 const redisClient = require('redis').createClient();
-const redisNsp = require('../redis/namespace');
+const redisNsp = require('../../constants/caching_names.enum');
 const async = require('async');
+const socketEnum = require('../../constants/socket.enum');
 
-const oneToOneOffline = (socketId, socket) => {
+
+const sendToOneOffline = (socketId, socket) => {
   async.forever((next) => {
-    redisClient.lpop(socketId + redisNsp.offline, (err, messageKey) => {
+    redisClient.lpop(socketId + redisNsp.OFFLINE, (err, messageKey) => {
       if (err) return console.log(err);
       if (messageKey) {
         redisClient.get(messageKey, (err, message) => {
           if (message) {
-            socket.emit("message", message);
+            socket.emit(socketEnum.MESSAGE, message);
             redisClient.del(messageKey);
           }
         });
@@ -23,4 +25,4 @@ const oneToOneOffline = (socketId, socket) => {
   })
 }
 
-module.exports = oneToOneOffline;
+module.exports = sendToOneOffline;
