@@ -1,5 +1,5 @@
 const _ = require('lodash');
-const redisClient = require('redis').createClient();
+const redisClient = require('../../util/redis').createClient();
 const async = require('async');
 const redisNsp = require('../../constants/caching_names.enum');
 const { v4: uuidv4 } = require('uuid');

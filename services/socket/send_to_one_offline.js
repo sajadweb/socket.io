@@ -1,4 +1,4 @@
-const redisClient = require('redis').createClient();
+const redisClient = require('../../util/redis').createClient();
 const redisNsp = require('../../constants/caching_names.enum');
 const async = require('async');
 const socketEnum = require('../../constants/socket.enum');

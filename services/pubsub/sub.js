@@ -1,5 +1,5 @@
 const NTypes = require('../../constants/notification_types.enum');
-const subscribe = require('redis').createClient();
+const subscribe = require('../../util/redis').createClient();
 const sendToOne = require('./send_to_one');
 const sendToMulti = require('./send_to_multi');
 const sendToAll = require('./send_to_all');

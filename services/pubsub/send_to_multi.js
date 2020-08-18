@@ -1,4 +1,4 @@
-const redisClient = require('redis').createClient();
+const redisClient = require('../../util/redis').createClient();
 const async = require('async');
 const _ = require('lodash');
 const redisNsp = require('../../constants/caching_names.enum');
