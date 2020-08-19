@@ -1,0 +1,29 @@
+{
+  "name": "socket",
+  "version": "1.0.0",
+  "description": "![\"Socket.png\"](socket.png)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/sakok/socket.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://gitlab.com/sakok/socket/issues"
+  },
+  "homepage": "https://gitlab.com/sakok/socket#readme",
+  "dependencies": {
+    "async": "^3.2.0",
+    "jsonwebtoken": "^8.5.1",
+    "lodash": "^4.17.20",
+    "redis": "^3.0.2",
+    "socket.io": "^2.3.0",
+    "util": "^0.12.3",
+    "uuid": "^8.3.0"
+  }
+}

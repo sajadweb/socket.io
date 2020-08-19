@@ -1,6 +1,5 @@
 const NTypes = require('../constants/notification_types.enum');
-const redisClient = require('').createClient();
-../util/redis
+const redisClient = require('../util/redis').createClient();
 
 exports.sendOneToOne = (data) => {
 
